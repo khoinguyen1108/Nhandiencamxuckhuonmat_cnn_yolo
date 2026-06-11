@@ -64,17 +64,27 @@ Cách xây dựng:
 - Hàm launch() được cấu hình ở dòng cuối để thiết lập máy chủ cục bộ theo thời gian thực.
 
 PHẦN 8: HƯỚNG DẪN HUẤN LUYỆN VÀ SỬ DỤNG
-1. Hướng dẫn huấn luyện:
-- Mở cửa sổ giao diện dòng lệnh (Terminal/Command Prompt).
-- Chuyển thư mục đường dẫn về vị trí gốc của dự án.
-- Kích hoạt trình thông dịch ngôn ngữ có chứa các bộ thư viện phân tích.
-- Thực thi mã kịch bản huấn luyện của hệ thống YOLO bằng việc chỉ định tệp thông số YAML cấu hình dữ liệu và file trọng số sơ khởi.
-- Kế tiếp, chạy mã kịch bản huấn luyện CNN, mã nguồn tự động lặp qua thư mục tập dữ liệu khuôn mặt, chạy tiến trình lan truyền ngược tối ưu hàm mất mát. File định dạng dạng .pt hoặc .pth chứa trọng số nhẹ nhất, cho độ suy luận tốt nhất ở tập Validation sẽ được xuất ra vào thư mục lưu trữ trọng số.
-2. Hướng dẫn sử dụng:
-- Tại thư mục gốc dự án, dùng lệnh ngôn ngữ để thực thi file khởi chạy của Gradio.
-- Máy chủ khởi tạo và in ra một chuỗi địa chỉ giao thức cục bộ (thường là http://127.0.0.1:7860).
-- Sao chép đường dẫn này và dán vào thanh tìm kiếm trên trình duyệt web.
-- Giao diện mở ra, tải hình ảnh có sự xuất hiện của khuôn mặt hoặc cấp quyền kích hoạt webcam, sau đó thực thi phân tích để hiển thị kết quả cảm xúc trên màn hình theo dòng thời gian thực.
+Toàn bộ quá trình từ huấn luyện mô hình đến suy luận dự đoán đều được tích hợp trên một nền tảng giao diện web duy nhất. Cấu trúc ứng dụng được chia thành 3 không gian làm việc đa nhiệm:
+
+1. Khởi động hệ thống:
+- Thực thi khối mã nguồn lệnh cuối cùng trong nền tảng Jupyter Notebook.
+- Hệ thống sẽ cấp phát một địa chỉ máy chủ cục bộ (thường là http://127.0.0.1:7860).
+- Truy cập liên kết trên thông qua trình duyệt web để bắt đầu quá trình vận hành ứng dụng.
+
+2. Không gian "Dự Đoán Cảm Xúc":
+- Cung cấp tính năng phân tích đa luồng: xử lý hình ảnh tĩnh (Upload) hoặc luồng video thời gian thực (Camera).
+- Đối với ảnh tĩnh: Nạp tệp dữ liệu hình ảnh vào khu vực quy định và kích hoạt lệnh "Bắt đầu Dự đoán".
+- Đối với video trực tiếp: Hệ thống tích hợp nút lệnh "Mở Camera Nhận Diện Trực Tiếp". Khi kích hoạt, một cửa sổ độc lập phân tích tín hiệu liên tục từ Webcam (OpenCV) sẽ được khởi tạo. Người vận hành chỉ cần nhấn phím 'q' trên bàn phím để kết thúc tín hiệu luồng.
+- Tại luồng xử lý: Hệ thống sẽ dò tìm khuôn mặt bằng YOLO, đồng bộ chuẩn hóa góc xoay (Face Alignment), chuyển giao ma trận điểm ảnh cho mạng lưới CNN và hiển thị kết quả. Nút gắn cờ (Flag) đóng vai trò lưu lại các ca suy luận lỗi.
+
+3. Không gian "Điều Khiển Huấn Luyện":
+- Xóa bỏ việc phải sửa đổi mã nguồn thủ công, không gian này cung cấp các lệnh tự động hóa tiến trình học sâu.
+- Lệnh "Bắt đầu Huấn Luyện YOLO" hoặc "Bắt đầu Huấn Luyện CNN" sẽ khởi động quy trình cấp phát tính toán học sâu ngầm dưới máy chủ.
+- Trạng thái tiến độ và kết quả huấn luyện sẽ được trả về trực tiếp trên màn hình, báo hiệu quá trình cập nhật trọng số đã hoàn tất. Quản trị viên chỉ cần tải lại nền tảng để áp dụng kết quả.
+
+4. Không gian "Biểu Đồ Huấn Luyện (Loss & Eval)":
+- Đảm nhiệm việc hiển thị toàn cảnh tình trạng hiệu suất hệ thống xuyên suốt tiến trình huấn luyện.
+- Sau khi vận hành ở Không gian Điều Khiển Huấn Luyện, đồ thị tại đây sẽ tự động kết xuất dữ liệu để minh họa sự sụt giảm hàm mất mát, gia tăng độ chính xác (Accuracy, mAP), cũng như xuất bản ma trận nhầm lẫn (Confusion Matrix).
 
 PHẦN 9: TRỰC QUAN HÓA BIỂU ĐỒ HUẤN LUYỆN (LOSS & EVALUATION)
 Để đánh giá trực quan hiệu suất của cả hệ thống trong suốt quá trình huấn luyện, các biểu đồ về hàm mất mát (Loss) và các chỉ số đánh giá (Evaluation) được xuất bản hoàn toàn tự động. Hệ thống hỗ trợ xem các biểu đồ này trực tiếp tại Thẻ "Biểu Đồ Huấn Luyện" trên giao diện Gradio.
